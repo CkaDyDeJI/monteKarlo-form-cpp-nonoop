@@ -17,8 +17,8 @@ namespace monteCarloNonOOPForms
 	public ref class MyForm : public Form
 	{
 	private:
-		Generic::List <PointF>^ mainList_ = gcnew Generic::List<PointF> ();
-		double k1_;
+		Generic::List <PointF>^ mainList_ = gcnew Generic::List<PointF> ();	//список с точками
+		double k1_;	//коэффициенты для трех уравнений
 		double b1_;
 
 		double k2_;
@@ -29,7 +29,7 @@ namespace monteCarloNonOOPForms
 
 		int functionsIsCalculated = 0;
 
-		PointF^ leftPoint_;
+		PointF^ leftPoint_;	//отдельно поинты
 		PointF^ upPoint_;
 		PointF^ rightPoint_;
 
@@ -62,7 +62,8 @@ namespace monteCarloNonOOPForms
 			}
 		}
 
-
+		/////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////автоматическая генерация дальше
 	private:
 		DataGridView^ dataGridView1;
 	protected:
@@ -256,23 +257,25 @@ namespace monteCarloNonOOPForms
 			this->ResumeLayout ( false );
 			this->PerformLayout();
 		}
+
+		////////////////////////////////////////////////////////
+		///////////////////////автоматическая генерация конец
+
 #pragma endregion
 	private:
-		Void button1_Click ( Object^ sender, EventArgs^ e )
+		Void button1_Click ( Object^ sender, EventArgs^ e )	//при нажатии на кнопку начинать вычисления
 		{
-			if (setPoints () == false) {
+			if (setPoints () == false) {	//проверка, нормально ли введены координаты точек
 				return;
 			}
 
 			//NonOOP main2 = new NonOOP ();
-			outputResult (doStuff (mainList_));
+			outputResult (doStuff (mainList_));	//начало вычислений и вывод в таблицу
 		}
 
 
-		void outputResult (ReturnedData^ dataForOutput)
+		void outputResult (ReturnedData^ dataForOutput)	//записывание в таблицу
 		{
-			//var dataGridView1 = dataGrids[textBoxNumber];
-
 			auto squares = dataForOutput->getSquares();
 			auto accs = dataForOutput->getAccs();
 			auto numbOfPoints = dataForOutput->getNumber();
@@ -295,10 +298,9 @@ namespace monteCarloNonOOPForms
 		}
 
 
-		bool setPoints ()
+		bool setPoints ()	//проверка введены ли точки нормально
 		{
 			array <String^>^ temp;
-			//Generic::List<String^>^ temp = gcnew Generic::List<String^>();
 
 			try
 			{
@@ -336,9 +338,9 @@ namespace monteCarloNonOOPForms
 
 		ReturnedData^ doStuff ( Generic::List<PointF>^ withPoints)
 		{
-			setStuff (withPoints[0], withPoints[1], withPoints[2]);
+			setStuff (withPoints[0], withPoints[1], withPoints[2]);	//установка точек, минимальных значений и пр
 
-			ReturnedData^ data = gcnew ReturnedData ();
+			ReturnedData^ data = gcnew ReturnedData ();	//то же самое что и в ооп
 			Diagnostics::Stopwatch^ watch = gcnew Diagnostics::Stopwatch ();
 
 			auto actuallySquare = calculateActualSquare ();
@@ -380,7 +382,7 @@ namespace monteCarloNonOOPForms
 
 		void setStuff (PointF^ leftPoint, PointF^ upPoint, PointF^ rightPoint)
 		{
-			leftPoint_ = leftPoint;
+			leftPoint_ = leftPoint;	//то же самое что и в ооп
 			upPoint_ = upPoint;
 			rightPoint_ = rightPoint;
 
@@ -403,7 +405,7 @@ namespace monteCarloNonOOPForms
 		}
 
 
-		void calculateSquare ()
+		void calculateSquare ()	//площадь прямоугольника
 		{
 			square_ = (maxX_ - minX_) * (maxY_ - minY_);
 		}
@@ -411,13 +413,13 @@ namespace monteCarloNonOOPForms
 
 		bool isInside (PointF^ newPoint)
 		{
-			if (functionsIsCalculated != 3) {
+			if (functionsIsCalculated != 3) {	//проверка, вычислены ли коэффициенты для лин уравнений
 				MessageBox::Show ("stuff is not set!");
 
 				return false;
 			}
 
-			if ((isLowerlinearFunctionFirst (newPoint->X, newPoint->Y) == true) &&
+			if ((isLowerlinearFunctionFirst (newPoint->X, newPoint->Y) == true) &&	//то же самое, только последнее проверка находится ли над
 				(isLowerlinearFunctionSecond (newPoint->X, newPoint->Y) == true) &&
 				(isUpperlinearFunction (newPoint->X, newPoint->Y) == true))
 				return true;
@@ -426,7 +428,7 @@ namespace monteCarloNonOOPForms
 		}
 
 
-		void calculateLinearCoeffsFirst (PointF^ firstPoint, PointF^ secondPoint)
+		void calculateLinearCoeffsFirst (PointF^ firstPoint, PointF^ secondPoint)	//для первого уравнения коэфф
 		{
 			k1_ = (secondPoint->Y - firstPoint->Y) / (secondPoint->X - firstPoint->X);
 			b1_ = firstPoint->Y - k1_ * firstPoint->X;
@@ -435,7 +437,7 @@ namespace monteCarloNonOOPForms
 		}
 
 
-		void calculateLinearCoeffsSecond (PointF^ firstPoint, PointF^ secondPoint)
+		void calculateLinearCoeffsSecond (PointF^ firstPoint, PointF^ secondPoint)	//для второго уравнения коэфф
 		{
 			k2_ = (secondPoint->Y - firstPoint->Y) / (secondPoint->X - firstPoint->X);
 			b2_ = firstPoint->Y - k2_ * firstPoint->X;
@@ -444,7 +446,7 @@ namespace monteCarloNonOOPForms
 		}
 
 
-		void calculateLinearCoeffsThird (PointF^ firstPoint, PointF^ secondPoint)
+		void calculateLinearCoeffsThird (PointF^ firstPoint, PointF^ secondPoint)	//для третьего уравнения коэфф
 		{
 			k3_ = (secondPoint->Y - firstPoint->Y) / (secondPoint->X - firstPoint->X);
 			b3_ = firstPoint->Y - k3_ * firstPoint->X;
@@ -453,30 +455,27 @@ namespace monteCarloNonOOPForms
 		}
 
 
-		bool isLowerlinearFunctionFirst (double x, double y)
+		bool isLowerlinearFunctionFirst (double x, double y)	//снизу ли для первого первого уравнения
 		{
 			return (y < (k1_* x + b1_)) ? true : false;
 		}
 
 
-		bool isLowerlinearFunctionSecond (double x, double y)
+		bool isLowerlinearFunctionSecond (double x, double y)	//снизу ли для второго уравнения
 		{
 			return (y < (k2_* x + b2_)) ? true : false;
 		}
 
 
-		bool isUpperlinearFunction (double x, double y)
+		bool isUpperlinearFunction (double x, double y)	//сверху ли для третьего уравнения
 		{
 			return (y > (k3_ * x + b3_)) ? true : false;
 		}
 
 
-		double calculateActualSquare ()
+		double calculateActualSquare ()	//настоящая площадь
 		{
 			return (square_ - ((maxY_ - leftPoint_->Y) * (upPoint_->X - minX_) * 0.5) - ((maxX_ - upPoint_->X) * (maxY_ - rightPoint_->Y) * 0.5) - (0.5 * ((leftPoint_->Y - minY_) + (rightPoint_->Y - minY_)) * (maxX_ - minX_)));
-
-			//return ((centerCircle_.X - leftDown.X) * centerCircle_.Radius / 2) +
-			//       (Math.PI * centerCircle_.Radius * centerCircle_.Radius / 4);
 		}
 	};
 }
