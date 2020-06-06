@@ -323,7 +323,7 @@ namespace monteCarloNonOOPForms
 				for (int j = 0; j < n; j++) {
 					randomX = minX_ + Convert::ToDouble (number->Next (0, 132767)) / 132767 * (maxX_ - minX_);
 					randomY = minY_ + Convert::ToDouble (number->Next (0, 132767)) / 132767 * (maxY_ - minY_);
-					if (isInside (gcnew PointF (randomX, randomY)))
+					if (isInside (randomX, randomY))
 						insideCounter++;
 				}
 
@@ -365,11 +365,11 @@ namespace monteCarloNonOOPForms
 		}
 
 
-		bool isInside (PointF^ newPoint)
+		bool isInside (double x, double y)
 		{
-			if ((isLowerlinearFunctionFirst (newPoint->X, newPoint->Y) == true) &&
-				(isLowerlinearFunctionSecond (newPoint->X, newPoint->Y) == true) &&
-				(isUpperlinearFunction (newPoint->X, newPoint->Y) == true))
+			if ((isLowerlinearFunctionFirst (x, y) == true) &&
+				(isLowerlinearFunctionSecond (x, y) == true) &&
+				(isUpperlinearFunction (x, y) == true))
 				return true;
 			else
 				return false;
