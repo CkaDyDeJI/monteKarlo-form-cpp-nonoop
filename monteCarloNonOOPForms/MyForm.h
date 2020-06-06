@@ -17,7 +17,6 @@ namespace monteCarloNonOOPForms
 	public ref class MyForm : public Form
 	{
 	private:
-		Generic::List <PointF>^ mainList_ = gcnew Generic::List<PointF> ();
 		double k1_;
 		double b1_;
 
@@ -29,9 +28,10 @@ namespace monteCarloNonOOPForms
 
 		int functionsIsCalculated = 0;
 
-		PointF^ leftPoint_;
-		PointF^ upPoint_;
-		PointF^ rightPoint_;
+		PointF^ aPoint_;
+		PointF^ bPoint_;
+		PointF^ cPoint_;
+		PointF^ dPoint_;
 
 		double minY_;
 		double minX_;
@@ -63,36 +63,21 @@ namespace monteCarloNonOOPForms
 		}
 
 
-	private:
+		
 		DataGridView^ dataGridView1;
-	protected:
-	private:
 		DataGridViewTextBoxColumn^ nPoints;
-	private:
 		DataGridViewTextBoxColumn^ nPointsInside;
-	private:
 		DataGridViewTextBoxColumn^ square;
-	private:
 		DataGridViewTextBoxColumn^ mkSquare;
-	private:
 		DataGridViewTextBoxColumn^ accuracy;
-	private:
 		DataGridViewTextBoxColumn^ time;
-	private:
 		Button^ button1;
-	private:
 		TextBox^ textBox3;
-	private:
 		TextBox^ textBox2;
-	private:
 		TextBox^ textBox1;
-	private:
 		Label^ label3;
-	private:
 		Label^ label2;
-	private:
 		Label^ label1;
-	private:
 		PictureBox^ pictureBox1;
 	private:
 		/// <summary>
@@ -256,6 +241,9 @@ namespace monteCarloNonOOPForms
 			this->ResumeLayout ( false );
 			this->PerformLayout();
 		}
+
+
+		
 #pragma endregion
 	private:
 		Void button1_Click ( Object^ sender, EventArgs^ e )
@@ -264,46 +252,18 @@ namespace monteCarloNonOOPForms
 				return;
 			}
 
-			//NonOOP main2 = new NonOOP ();
-			outputResult (doStuff (mainList_));
-		}
-
-
-		void outputResult (ReturnedData^ dataForOutput)
-		{
-			//var dataGridView1 = dataGrids[textBoxNumber];
-
-			auto squares = dataForOutput->getSquares();
-			auto accs = dataForOutput->getAccs();
-			auto numbOfPoints = dataForOutput->getNumber();
-			auto numbOfPointsInside = dataForOutput->getInside();
-			auto times = dataForOutput->getTimes();
-			int currentRow = dataGridView1->RowCount - 1;
-			for (int i = 0; i < squares->Count; i++)
-			{
-				dataGridView1->Rows->Add();
-				dataGridView1->Rows[currentRow]->Cells[0]->Value = numbOfPoints[i];
-				dataGridView1->Rows[currentRow]->Cells[1]->Value = numbOfPointsInside[i];
-				dataGridView1->Rows[currentRow]->Cells[2]->Value = dataForOutput->getAcSquare();
-				dataGridView1->Rows[currentRow]->Cells[3]->Value = squares[i];
-				dataGridView1->Rows[currentRow]->Cells[4]->Value = accs[i];
-				dataGridView1->Rows[currentRow]->Cells[5]->Value = times[i];
-				currentRow++;
-			}
-			
-			dataGridView1->Rows->Add();
+			doStuff ();
 		}
 
 
 		bool setPoints ()
 		{
 			array <String^>^ temp;
-			//Generic::List<String^>^ temp = gcnew Generic::List<String^>();
 
 			try
 			{
 				temp = textBox1->Text->Replace ( '.', ',' )->Split ( gcnew array <Char>{' '} );
-				mainList_->Add ( PointF ( Convert::ToDouble ( temp[0] ), Convert::ToDouble ( temp[1] ) ) );
+				aPoint_ = gcnew PointF (Convert::ToDouble (temp[0]), Convert::ToDouble (temp[1]));
 			}
 			catch (...)
 			{
@@ -313,7 +273,7 @@ namespace monteCarloNonOOPForms
 			try
 			{
 				temp = textBox2->Text->Replace ( '.', ',' )->Split ( gcnew array <Char>{' '} );
-				mainList_->Add ( PointF ( Convert::ToDouble ( temp[0] ), Convert::ToDouble ( temp[1] ) ) );
+				bPoint_ = gcnew PointF (Convert::ToDouble (temp[0]), Convert::ToDouble (temp[1]));
 			}
 			catch (...)
 			{
@@ -323,26 +283,32 @@ namespace monteCarloNonOOPForms
 			try
 			{
 				temp = textBox3->Text->Replace ( '.', ',' )->Split ( gcnew array <Char>{' '} );
-				mainList_->Add ( PointF ( Convert::ToDouble ( temp[0] ), Convert::ToDouble ( temp[1] ) ) );
+				cPoint_ = gcnew PointF (Convert::ToDouble (temp[0]), Convert::ToDouble (temp[1]));
 			}
 			catch (...)
 			{
 				MessageBox::Show ( "правая точка задана неверна" );
 				return false;
 			}
+			try {
+				temp = textBox4->Text->Replace ('.', ',')->Split (gcnew array <Char>{' '});
+				dPoint_ = gcnew PointF (Convert::ToDouble (temp[0]), Convert::ToDouble (temp[1]));
+			} catch (...) {
+				MessageBox::Show ("правая точка задана неверна");
+				return false;
+			}
+			
 			return true;
 		}
 
 
-		ReturnedData^ doStuff ( Generic::List<PointF>^ withPoints)
+		void doStuff ()
 		{
-			setStuff (withPoints[0], withPoints[1], withPoints[2]);
+			setStuff ();
 
-			ReturnedData^ data = gcnew ReturnedData ();
 			Diagnostics::Stopwatch^ watch = gcnew Diagnostics::Stopwatch ();
 
 			auto actuallySquare = calculateActualSquare ();
-			data->setAcSquare(actuallySquare);
 
 			Random^ number = gcnew Random ();
 			int insideCounter;
@@ -355,8 +321,8 @@ namespace monteCarloNonOOPForms
 
 				insideCounter = 0;
 				for (int j = 0; j < n; j++) {
-					randomX = minX_ + Convert::ToDouble (number->Next (0, 132767)) / 132767 * (maxX_ - minX_); //minX_ * number.Next (ToInt32 ( minX_ ), ToInt32(maxX_));
-					randomY = minY_ + Convert::ToDouble (number->Next (0, 132767)) / 132767 * (maxY_ - minY_); //number.Next (ToInt32 ( minY_ ), ToInt32(maxY_));
+					randomX = minX_ + Convert::ToDouble (number->Next (0, 132767)) / 132767 * (maxX_ - minX_);
+					randomY = minY_ + Convert::ToDouble (number->Next (0, 132767)) / 132767 * (maxY_ - minY_);
 					if (isInside (gcnew PointF (randomX, randomY)))
 						insideCounter++;
 				}
@@ -365,41 +331,31 @@ namespace monteCarloNonOOPForms
 
 				watch->Stop ();
 
-				data->addSquare (square);
-				data->addAcc (System::Math::Abs (square - actuallySquare) / actuallySquare);
-				data->addPoints (n);
-				data->addPointsInside (insideCounter);
-				data->addTime (watch->Elapsed);
+				dataGridView1->Rows->Add (n, insideCounter, actuallySquare, square, System::Math::Abs (square - actuallySquare) / actuallySquare * 100, watch->Elapsed);
 
 				watch->Reset ();
 			}
-
-			return data;
 		}
 
 
-		void setStuff (PointF^ leftPoint, PointF^ upPoint, PointF^ rightPoint)
+		void setStuff ()
 		{
-			leftPoint_ = leftPoint;
-			upPoint_ = upPoint;
-			rightPoint_ = rightPoint;
-
 			setMinsAndMaxs ();
 
 			calculateSquare ();
 
-			calculateLinearCoeffsFirst (leftPoint_, upPoint_);
-			calculateLinearCoeffsSecond (upPoint_, rightPoint_);
-			calculateLinearCoeffsThird (leftPoint_, rightPoint_);
+			calculateLinearCoeffsFirst (bPoint_, cPoint_);
+			calculateLinearCoeffsSecond (cPoint_, dPoint_);
+			calculateLinearCoeffsThird (dPoint_, aPoint_);
 		}
 
 
 		void setMinsAndMaxs ()
 		{
-			minX_ = leftPoint_->X;
-			minY_ = 0;
-			maxX_ = rightPoint_->X;
-			maxY_ = upPoint_->Y;
+			minX_ = aPoint_->X;
+			minY_ = aPoint_->Y;
+			maxX_ = dPoint_->X;
+			maxY_ = cPoint_->Y;
 		}
 
 
@@ -411,12 +367,6 @@ namespace monteCarloNonOOPForms
 
 		bool isInside (PointF^ newPoint)
 		{
-			if (functionsIsCalculated != 3) {
-				MessageBox::Show ("stuff is not set!");
-
-				return false;
-			}
-
 			if ((isLowerlinearFunctionFirst (newPoint->X, newPoint->Y) == true) &&
 				(isLowerlinearFunctionSecond (newPoint->X, newPoint->Y) == true) &&
 				(isUpperlinearFunction (newPoint->X, newPoint->Y) == true))
@@ -430,8 +380,6 @@ namespace monteCarloNonOOPForms
 		{
 			k1_ = (secondPoint->Y - firstPoint->Y) / (secondPoint->X - firstPoint->X);
 			b1_ = firstPoint->Y - k1_ * firstPoint->X;
-
-			functionsIsCalculated++;
 		}
 
 
@@ -439,8 +387,6 @@ namespace monteCarloNonOOPForms
 		{
 			k2_ = (secondPoint->Y - firstPoint->Y) / (secondPoint->X - firstPoint->X);
 			b2_ = firstPoint->Y - k2_ * firstPoint->X;
-
-			functionsIsCalculated++;
 		}
 
 
@@ -448,8 +394,6 @@ namespace monteCarloNonOOPForms
 		{
 			k3_ = (secondPoint->Y - firstPoint->Y) / (secondPoint->X - firstPoint->X);
 			b3_ = firstPoint->Y - k3_ * firstPoint->X;
-
-			functionsIsCalculated++;
 		}
 
 
@@ -473,10 +417,7 @@ namespace monteCarloNonOOPForms
 
 		double calculateActualSquare ()
 		{
-			return (square_ - ((maxY_ - leftPoint_->Y) * (upPoint_->X - minX_) * 0.5) - ((maxX_ - upPoint_->X) * (maxY_ - rightPoint_->Y) * 0.5) - (0.5 * ((leftPoint_->Y - minY_) + (rightPoint_->Y - minY_)) * (maxX_ - minX_)));
-
-			//return ((centerCircle_.X - leftDown.X) * centerCircle_.Radius / 2) +
-			//       (Math.PI * centerCircle_.Radius * centerCircle_.Radius / 4);
+			return (square_ - ((maxY_ - bPoint_->Y) * (cPoint_->X - minX_) * 0.5) - ((maxX_ - cPoint_->X) * (maxY_ - dPoint_->Y) * 0.5) - ((dPoint_->Y - minY_) * (maxX_ - aPoint_->X) * 0.5));
 		}
 	};
 }
