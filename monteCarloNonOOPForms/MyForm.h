@@ -3,7 +3,7 @@
 namespace monteCarloNonOOPForms
 {
 	using namespace System;
-	using namespace ComponentModel;
+	using namespace System::ComponentModel;
 	using namespace Collections;
 	using namespace Windows::Forms;
 	using namespace Data;
@@ -19,16 +19,12 @@ namespace monteCarloNonOOPForms
 		double k1_;	//коэффициенты для лин уравнений, описывающих отрезок bc
 		double b1_;
 
-		double k2_;	//отрезок cd
-		double b2_;
-
-		double k3_;	//отрезок da
-		double b3_;
-
-		PointF^ aPoint_;	//поинты для точек
+		double centerX_;
+		double centerY_;
+		double radius_;
+						//поинты для точек
 		PointF^ bPoint_;
-		PointF^ cPoint_;
-		PointF^ dPoint_;
+		PointF^ fPoint_;
 
 		double minY_;	//координаты минимальных и максимальных значений прямоугольника, в который вписана фигура
 		double minX_;
@@ -267,6 +263,8 @@ namespace monteCarloNonOOPForms
 
 		
 #pragma endregion
+
+		
 		Void button1_Click ( Object^ sender, EventArgs^ e )	//нажатие на кнопку
 		{
 			if (setPoints () == false) {	//проверка, правильно ли введены точки
@@ -282,19 +280,10 @@ namespace monteCarloNonOOPForms
 			array <String^>^ temp;
 
 			//попытки парсинга текстбоксов в значений (значения вводить для точек через пробел)
+			
 			try
 			{
 				temp = textBox1->Text->Replace ( '.', ',' )->Split ( gcnew array <Char>{' '} );
-				aPoint_ = gcnew PointF (Convert::ToDouble (temp[0]), Convert::ToDouble (temp[1]));
-			}
-			catch (...)
-			{
-				MessageBox::Show ( "точка a задана неверна" );
-				return false;
-			}
-			try
-			{
-				temp = textBox2->Text->Replace ( '.', ',' )->Split ( gcnew array <Char>{' '} );
 				bPoint_ = gcnew PointF (Convert::ToDouble (temp[0]), Convert::ToDouble (temp[1]));
 			}
 			catch (...)
@@ -302,19 +291,10 @@ namespace monteCarloNonOOPForms
 				MessageBox::Show ( "точка b задана неверна" );
 				return false;
 			}
-			try
-			{
-				temp = textBox3->Text->Replace ( '.', ',' )->Split ( gcnew array <Char>{' '} );
-				cPoint_ = gcnew PointF (Convert::ToDouble (temp[0]), Convert::ToDouble (temp[1]));
-			}
-			catch (...)
-			{
-				MessageBox::Show ( "точка c задана неверна" );
-				return false;
-			}
+			
 			try {
-				temp = textBox4->Text->Replace ('.', ',')->Split (gcnew array <Char>{' '});
-				dPoint_ = gcnew PointF (Convert::ToDouble (temp[0]), Convert::ToDouble (temp[1]));
+				temp = textBox2->Text->Replace ('.', ',')->Split (gcnew array <Char>{' '});
+				fPoint_ = gcnew PointF (Convert::ToDouble (temp[0]), Convert::ToDouble (temp[1]));
 			} catch (...) {
 				MessageBox::Show ("точка d задана неверна");
 				return false;
@@ -362,41 +342,42 @@ namespace monteCarloNonOOPForms
 
 		void setStuff ()
 		{
-			setMinsAndMaxs ();
+			calculateCircleAttribs (bPoint_, fPoint_);
+			calculateLinearCoeffsFirst (gcnew PointF (bPoint_->X + radius_, (bPoint_->Y + fPoint_->Y) / 2), fPoint_);
+			
+			minX_ = bPoint_->X;
+			maxX_ = bPoint_->X + radius_;
+			minY_ = fPoint_->Y;
+			maxY_ = bPoint_->Y;
 
-			calculateSquare ();
-
-			calculateLinearCoeffsFirst (bPoint_, cPoint_);
-			calculateLinearCoeffsSecond (cPoint_, dPoint_);
-			calculateLinearCoeffsThird (dPoint_, aPoint_);
-		}
-
-
-		void setMinsAndMaxs ()	//координаты угловых точек прямоугольника
-		{
-			minX_ = aPoint_->X;
-			minY_ = aPoint_->Y;
-			maxX_ = dPoint_->X;
-			maxY_ = cPoint_->Y;
-		}
-
-
-		void calculateSquare ()	//площадь прямоугольника
-		{
 			square_ = (maxX_ - minX_) * (maxY_ - minY_);
 		}
 
 
 		bool isInside (double x, double y)	//проверка внутри ли
 		{
-			if ((isLowerlinearFunctionFirst (x, y) == true) &&	//внутри если ниже отрезков bc и cd но выше da
-				(isLowerlinearFunctionSecond (x, y) == true) &&
-				(isUpperlinearFunction (x, y) == true))
-				return true;
+			if (y >= centerY_)
+			{
+				if (isInsideCircle (x, y) == true)
+					return true;
+			}
 			else
-				return false;
+			{
+				if (isUpperlinearFunction (x, y) == true)
+					return true;
+			}
+			
+			return false;
 		}
 
+
+		void calculateCircleAttribs (PointF^ firstPoint, PointF^ secondPoint)
+		{
+			centerX_ = firstPoint->X;
+			centerY_ = (firstPoint->Y + secondPoint->Y) / 2;
+			radius_ = (firstPoint->Y - secondPoint->Y) / 2;
+		}
+		
 
 		void calculateLinearCoeffsFirst (PointF^ firstPoint, PointF^ secondPoint)	//вычисление коэфф для bc
 		{
@@ -405,41 +386,21 @@ namespace monteCarloNonOOPForms
 		}
 
 
-		void calculateLinearCoeffsSecond (PointF^ firstPoint, PointF^ secondPoint)	//вычисление коэфф для cd
+		bool isInsideCircle(double x, double y)
 		{
-			k2_ = (secondPoint->Y - firstPoint->Y) / (secondPoint->X - firstPoint->X);
-			b2_ = firstPoint->Y - k2_ * firstPoint->X;
-		}
-
-
-		void calculateLinearCoeffsThird (PointF^ firstPoint, PointF^ secondPoint)	//вычисление коэфф для da
-		{
-			k3_ = (secondPoint->Y - firstPoint->Y) / (secondPoint->X - firstPoint->X);
-			b3_ = firstPoint->Y - k3_ * firstPoint->X;
-		}
-
-
-		bool isLowerlinearFunctionFirst (double x, double y)	//ниже ли отрезка bc
-		{
-			return (y < (k1_* x + b1_)) ? true : false;
-		}
-
-
-		bool isLowerlinearFunctionSecond (double x, double y)	//ниже ли отрезка cd
-		{
-			return (y < (k2_* x + b2_)) ? true : false;
+			return ((x - centerX_) * (x - centerX_) + (y - centerY_) * (y - centerY_)) <= (radius_ * radius_);
 		}
 
 
 		bool isUpperlinearFunction (double x, double y)	//выше ли отрезка da
 		{
-			return (y > (k3_ * x + b3_)) ? true : false;
+			return (y > (k1_* x + b1_)) ? true : false;
 		}
 
 
 		double calculateActualSquare ()	//вычисление настоящей площади, вычитая из площади прямоугольника площади треугольников, которые отсекаются от прямоугольника отрезками bc, cd, da
 		{
-			return (square_ - ((maxY_ - bPoint_->Y) * (cPoint_->X - minX_) * 0.5) - ((maxX_ - cPoint_->X) * (maxY_ - dPoint_->Y) * 0.5) - ((dPoint_->Y - minY_) * (maxX_ - aPoint_->X) * 0.5));
+			return Math::PI * radius_ * radius_ / 4 + (square_ / 2 - (centerY_ - minY_) * (maxX_ - minX_) * 0.5);
 		}
 	};
 }
