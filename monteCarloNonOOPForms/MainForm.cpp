@@ -1,4 +1,4 @@
-#include "MyForm.h"
+#include "MainForm.h"
 
 using namespace System;
 using namespace System::Windows::Forms;
@@ -10,5 +10,5 @@ void main (array<String^>^ arg)
     Application::SetCompatibleTextRenderingDefault (false);
 
     //monteKarloformscpp::MyForm form; //WinFormsTest - имя вашего проекта
-    Application::Run (gcnew monteCarloNonOOPForms::MyForm ());
+    Application::Run (gcnew monteCarloNonOOPForms::MainForm ());
 }
