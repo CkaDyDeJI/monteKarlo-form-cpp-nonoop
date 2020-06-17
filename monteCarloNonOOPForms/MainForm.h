@@ -292,11 +292,11 @@ namespace monteCarloNonOOPForms {
 #pragma endregion
 		Void button1_Click (System::Object^ sender, System::EventArgs^ e)
 		{
-			if (setPoints () == false) {	//проверка, правильно ли введены точки
-				return;
-			}
+			if (radioButton1->Checked == true)
+				if (setPoints () == false)	//проверка, правильно ли введены точки
+					return;
 
-			doStuff ();	//выполнение вычислений
+			MonteCarlo ();	//выполнение вычислений
 		}
 
 
@@ -338,9 +338,9 @@ namespace monteCarloNonOOPForms {
 		}
 
 
-		void doStuff ()
+		void MonteCarlo ()
 		{
-			setStuff ();	//установка минимальных значений и прочего
+			setVariables ();	//установка минимальных значений и прочего
 
 			Diagnostics::Stopwatch^ watch = gcnew Diagnostics::Stopwatch ();
 
@@ -372,7 +372,7 @@ namespace monteCarloNonOOPForms {
 		}
 
 
-		void setStuff ()
+		void setVariables ()
 		{
 			calculateCircleAttribs (bPoint_, fPoint_);
 			calculateLinearCoeffsFirst (gcnew PointF (bPoint_->X + radius_, (bPoint_->Y + fPoint_->Y) / 2), fPoint_);
